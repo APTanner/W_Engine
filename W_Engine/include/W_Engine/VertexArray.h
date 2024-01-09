@@ -8,8 +8,15 @@ namespace W_Engine
 	class VertexArray
 	{
 	public:
-		VertexArray();
-		~VertexArray();
+        VertexArray();
+        ~VertexArray();
+
+        VertexArray(VertexArray&& other) noexcept :
+            m_vao(other.m_vao),
+            m_vertexBuffer(std::move(other.m_vertexBuffer)),
+            m_elementBuffer(std::move(other.m_elementBuffer))
+        {
+        }
 
 		void SetVertexBuffer(std::unique_ptr<VertexBuffer> vertexBuffer);
 		void SetElementBuffer(std::unique_ptr<ElementBuffer> elementBuffer);

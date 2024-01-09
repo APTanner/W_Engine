@@ -1,9 +1,7 @@
 
-# visual studio
 .vs/
 *.vcxproj*
 *.sln
 
-# binaries
 bin/
 build/

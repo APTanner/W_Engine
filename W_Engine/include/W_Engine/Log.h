@@ -40,12 +40,12 @@ namespace W_Engine
 	};
 }
 
-#ifdef NDEBUG
+#define LOG_ERROR(...) W_Engine::Log::GetLogger().error(__FILENAME__, __LINE__, __VA_ARGS__)
+
+#ifdef RELEASE
 #define LOG_DEBUG(...) ((void)0)
 #define LOG_WARNING(...) ((void)0)
-#define LOG_ERROR(...) ((void)0)
 #else
 #define LOG_DEBUG(...) W_Engine::Log::GetLogger().debug(__FILENAME__, __LINE__, __VA_ARGS__)
 #define LOG_WARNING(...) W_Engine::Log::GetLogger().warning(__FILENAME__, __LINE__, __VA_ARGS__)
-#define LOG_ERROR(...) W_Engine::Log::GetLogger().error(__FILENAME__, __LINE__, __VA_ARGS__)
 #endif

@@ -17,6 +17,7 @@ namespace W_Engine
 		void SetViewMatrix(const glm::mat4& view);
 		void SetProjectionMatrix(const glm::mat4& projection);
 		void SetMat4(const std::string& name, const glm::mat4& matrix);
+        void SetInt(const std::string& name, const int value);
 	private:
 		unsigned int m_shader = 0;
 	};

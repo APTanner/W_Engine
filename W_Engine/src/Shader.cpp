@@ -145,7 +145,12 @@ namespace W_Engine
 	}
 	void Shader::SetMat4(const std::string& name, const glm::mat4& matrix)
 	{
-		int loc = glGetUniformLocation(m_shader, name.c_str());
+		GLint loc = glGetUniformLocation(m_shader, name.c_str());
 		glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
+    void Shader::SetInt(const std::string& name, const int value)
+    {
+        GLint loc = glGetUniformLocation(m_shader, name.c_str());
+        glUniform1i(loc, value);
+    }
 }

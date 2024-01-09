@@ -1,12 +1,14 @@
 workspace "RenderEngine"
     architecture "x64"
-
+    
     configurations
     {
         "Debug",
         "SeaTrials",
         "Release"
     }
+
+    startproject "Program"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.architecture}"
 
@@ -17,6 +19,7 @@ Includes["GLAD"] = "W_Engine/lib/GLAD/include"
 Includes["imgui"] = "W_Engine/lib/imgui"
 Includes["glm"] = "W_Engine/lib/glm"
 Includes["assimp"] = "W_Engine/lib/assimp/include"
+Includes["stb_image"] = "W_Engine/lib/stb_image/include"
 
 include "W_Engine/lib/GLFW"
 include "W_Engine/lib/GLAD"
@@ -42,7 +45,8 @@ project "W_Engine"
         "%{prj.name}/src/**.cpp",
         "%{prj.name}/include/**.h",
         "%{prj.name}/lib/glm/glm/**.hpp",
-        "%{prj.name}/lib/glm/glm/**.inl"
+        "%{prj.name}/lib/glm/glm/**.inl",
+        "%{prj.name}/lib/stb_image/include/**.h"
     }
 
     includedirs
@@ -53,7 +57,8 @@ project "W_Engine"
         "%{Includes.GLAD}",
         "%{Includes.imgui}",
         "%{Includes.glm}",
-        "%{Includes.assimp}"
+        "%{Includes.assimp}",
+        "%{Includes.stb_image}"
     }
 
     links {
@@ -156,4 +161,3 @@ project "Program"
         runtime "Release"
         optimize "On"
 
-    
