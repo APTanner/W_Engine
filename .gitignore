@@ -3,5 +3,4 @@
 *.vcxproj*
 *.sln
 
-bin/
 build/

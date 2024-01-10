@@ -1,5 +1,4 @@
 #pragma once
-#include <glad/glad.h>
 
 #include <initializer_list>
 #include <cstdint>
@@ -7,26 +6,8 @@
 #include <string>
 #include <vector>
 
-#include <assimp/AssertHandler.h>
-
-
 namespace W_Engine
 {
-	struct BufferDataTypeData
-	{
-		int ComponentCount;
-		int ElementSize;
-		GLenum GLType;
-	};
-
-	static constexpr uint32_t numBufferDataTypes = 3;
-
-	constexpr BufferDataTypeData bufferDataTypeData[numBufferDataTypes] = {
-		{2, sizeof(float), GL_FLOAT}, //vector2
-		{3, sizeof(float), GL_FLOAT}, //vector3
-		{4, sizeof(float), GL_FLOAT}, //vector4
-	};
-
 	enum class BufferDataType : uint32_t
 	{
 		Vector2 = 0, Vector3, Vector4,
@@ -38,20 +19,11 @@ namespace W_Engine
 		Normalized
 	};
 
-	inline int GetBufferDataTypeComponentCount(BufferDataType t)
-	{
-		return bufferDataTypeData[(uint32_t)t].ComponentCount;
-	}
+    int GetBufferDataTypeComponentCount(BufferDataType t);
 
-	inline int GetBufferDataTypeElementSize(BufferDataType t)
-	{
-		return bufferDataTypeData[(uint32_t)t].ElementSize;
-	}
+    int GetBufferDataTypeElementSize(BufferDataType t);
 
-	inline GLenum GetBufferDataTypeGLenum(BufferDataType t)
-	{
-		return bufferDataTypeData[(uint32_t)t].GLType;
-	}
+    unsigned int GetBufferDataTypeGLenum(BufferDataType t);
 
 	inline int GetBufferDataTypeSize(BufferDataType t)
 	{

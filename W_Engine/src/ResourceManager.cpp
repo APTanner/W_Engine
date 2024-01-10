@@ -16,6 +16,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#include <glad/glad.h>
+
 static W_Engine::Material loadMaterial(const aiMaterial& mat)
 {
     W_Engine::Material material;

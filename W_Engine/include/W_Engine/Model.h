@@ -46,7 +46,7 @@ namespace W_Engine
 
     struct Texture
     {
-        uint32_t ID;
+        uint32_t ID = 0;
         TextureType Type = static_cast<TextureType>(-1);
     };
 

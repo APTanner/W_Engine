@@ -3,6 +3,8 @@
 
 #include <W_Engine/Renderer.h>
 
+#include <glad/glad.h>
+
 static bool isUniqueTextureType(W_Engine::TextureType textureType, uint32_t& bitField)
 {
     uint32_t bit = 1u << static_cast<int>(textureType);

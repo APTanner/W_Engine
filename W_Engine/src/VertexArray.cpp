@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include <glad/glad.h>
+
 namespace W_Engine
 {
 	VertexArray::VertexArray()
@@ -26,7 +28,7 @@ namespace W_Engine
 			glVertexAttribPointer(
 				i,
 				GetBufferDataTypeComponentCount(element.Type),
-				GetBufferDataTypeGLenum(element.Type),
+				static_cast<GLenum>(GetBufferDataTypeGLenum(element.Type)),
 				element.Normalized ? GL_TRUE : GL_FALSE,
 				m_vertexBuffer->GetLayout().GetStride(),
 				reinterpret_cast<const void*>(element.Offset));
