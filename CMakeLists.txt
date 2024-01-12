@@ -8,5 +8,5 @@ add_subdirectory(W_Engine)
 add_subdirectory(Program)
 
 if (CMAKE_GENERATOR MATCHES "Visual Studio")
-	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY 	VS_STARTUP_PROJECT Program)
+	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY 		VS_STARTUP_PROJECT Program)
 endif()

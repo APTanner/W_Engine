@@ -1,5 +1,6 @@
 #include <W_Engine/ResourceManager.h>
 
+#include <Windows.h>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -17,6 +18,27 @@
 #include <stb_image.h>
 
 #include <glad/glad.h>
+
+static const std::string& getResourcesPath()
+{
+    static std::string path;
+
+    if (path.empty())
+    {
+        char buffer[MAX_PATH];
+        GetModuleFileNameA(NULL, buffer, MAX_PATH);
+        path = buffer;
+
+        size_t lastBackSlash = path.find_last_of("\\");
+        if (lastBackSlash != std::string::npos)
+        {
+            path = path.substr(0, lastBackSlash);
+        }
+        path = path + "\\resources";
+    }
+
+    return path;
+}
 
 static W_Engine::Material loadMaterial(const aiMaterial& mat)
 {
@@ -106,7 +128,7 @@ static W_Engine::Mesh processMesh(aiMesh* mesh, const aiScene* scene)
         verticies[i] = vertex;
     }
 
-    for (int i = 0; i < numIndicies; i++)
+    for (int i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace face = mesh->mFaces[i];
 
@@ -152,6 +174,8 @@ static void processNode(aiNode* node, const aiScene* scene, W_Engine::Model& mod
                 )
         );
     }
+    LOG_DEBUG("Meshes finished");
+
     // then do the same for each of its children
     for (unsigned int i = 0; i < node->mNumChildren; i++)
     {
@@ -161,11 +185,11 @@ static void processNode(aiNode* node, const aiScene* scene, W_Engine::Model& mod
 
 namespace W_Engine
 {
-    static const std::string RESOURCES_FILEPATH = ".resources/";
+    constexpr char SEPARATOR = '\\';
 
     Model ResourceManager::LoadModel(const std::string& filepath)
     {
-        std::string path = RESOURCES_FILEPATH + filepath;
+        std::string path = getResourcesPath() + SEPARATOR + filepath;
 
         if (!std::filesystem::exists(path))
         {
@@ -192,7 +216,7 @@ namespace W_Engine
 
     Shader ResourceManager::LoadShader(const std::string& filepath)
     {
-        std::string path = RESOURCES_FILEPATH + filepath;
+        std::string path = getResourcesPath() + SEPARATOR + filepath;
         if (!std::filesystem::exists(path))
         {
             LOG_ERROR("Shader file not found at path: %s", path);
