@@ -2,6 +2,7 @@
 #include <W_Engine/Log.h>
 
 #include <W_Engine/Renderer.h>
+#include <W_Engine/Application.h>
 
 #include <glad/glad.h>
 
@@ -61,24 +62,41 @@ namespace W_Engine
 			{ BufferDataType::Vector3, "color" }
 		};
 
-		m_vertexArray.Bind();
+        std::vector<float> vertexData;
+        vertexData.reserve(m_verticies.size() * (3 + 3 + 2 + 3));
+
+        for (const Vertex& v : m_verticies)
+        {
+            vertexData.push_back(v.Position.x);
+            vertexData.push_back(v.Position.y);
+            vertexData.push_back(v.Position.z);
+
+            vertexData.push_back(v.Normal.x);
+            vertexData.push_back(v.Normal.y);
+            vertexData.push_back(v.Normal.z);
+
+            vertexData.push_back(v.UVCoord.x);
+            vertexData.push_back(v.UVCoord.y);
+
+            vertexData.push_back(v.Color.x);
+            vertexData.push_back(v.Color.y);
+            vertexData.push_back(v.Color.z);
+        }
 
 		m_vertexArray.SetVertexBuffer(
 			std::make_unique<VertexBuffer>(
-				reinterpret_cast<float*>(m_verticies.data()),
-				sizeof(m_verticies.data()),
+				vertexData.data(),
+				sizeof(float) * vertexData.size(),
 				layout
 			)
 		);
 
-		m_vertexArray.SetElementBuffer(
-			std::make_unique<ElementBuffer>(
-				m_indicies.data(),
-				sizeof(m_indicies.data())
+        m_vertexArray.SetElementBuffer(
+            std::make_unique<ElementBuffer>(
+                m_indicies.data(),
+                sizeof(uint32_t) * m_indicies.size()
 			)
 		);
-
-		m_vertexArray.Unbind();
 		m_valid = true;
 	}
 
@@ -91,7 +109,7 @@ namespace W_Engine
             glBindTexture(GL_TEXTURE_2D, m_textures[i].ID);
         }
         glActiveTexture(GL_TEXTURE0);
-		Renderer::Render(m_vertexArray, transform, shader);
+		Application::Get().GetRenderer().Render(m_vertexArray, transform, shader);
 	}
 
 	//TODO

@@ -23,16 +23,26 @@ namespace W_Engine
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 	
-	void RenderCommands::DrawElements(const VertexArray& vertexArray, const Transform& transform, Shader& shader)
+	void RenderCommands::DrawElements(
+        const Camera& camera,
+        const VertexArray& vertexArray, 
+        const Transform& transform, 
+        Shader& shader)
 	{
-		Camera& activeCamera = Camera::GetActive();
-
 		shader.Bind();
-		shader.SetProjectionMatrix(activeCamera.GetProjection());
-		shader.SetViewMatrix(activeCamera.GetView());
+		shader.SetProjectionMatrix(camera.GetProjection());
+		shader.SetViewMatrix(camera.GetView());
 		shader.SetLocalToWorldMatrix(transform.LocaltoWorld());
-
+        
 		vertexArray.Bind();
+
+        //GLenum err;
+        //while ((err = glGetError()) != GL_NO_ERROR)
+        //{
+        //    // Process or log the error.
+        //    std::cerr << "OpenGL error: " << err << std::endl;
+        //}
+
 		glDrawElements(GL_TRIANGLES, vertexArray.GetIndexCount(), GL_UNSIGNED_INT, 0);
 	}
 	void RenderCommands::EnableDepthTest()

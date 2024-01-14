@@ -16,10 +16,10 @@ namespace W_Engine
 {
     struct Vertex
     {
-        glm::vec3 Position;
-        glm::vec3 Normal;
-        glm::vec2 UVCoord;
-        glm::vec3 Color;
+        glm::vec3 Position{};
+        glm::vec3 Normal{};
+        glm::vec2 UVCoord{};
+        glm::vec3 Color{};
     };
 
     enum class TextureType : int
@@ -41,7 +41,6 @@ namespace W_Engine
         glm::vec3 Diffuse;
         glm::vec3 Specular;
         glm::vec3 Ambient;
-        float Shininess ;
     };
 
     struct Texture
@@ -71,7 +70,7 @@ namespace W_Engine
         /*void SetVerticies(const std::vector<Vertex>& verticies);
         void SetIndicies(const std::vector<uint32_t>& indicies);
         void SetTextures(const Texture& texture);*/
-    private:
+    //private:
         std::vector<Vertex> m_verticies;
         std::vector<uint32_t> m_indicies;
         std::vector<Texture> m_textures;
@@ -86,6 +85,8 @@ namespace W_Engine
     public:
         std::vector<std::unique_ptr<Mesh>> Meshes;
         std::string Path;
+
+        void Draw(const Transform& transform, Shader& shader) const;
     private:
     };
 }

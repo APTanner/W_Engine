@@ -5,6 +5,7 @@
 #include <W_Engine/VertexArray.h>
 #include <W_Engine/Transform.h>
 #include <W_Engine/Shader.h>
+#include <W_Engine/Camera.h>
 
 namespace W_Engine
 {
@@ -15,7 +16,12 @@ namespace W_Engine
 		static void ClearColorBuffer();
 		static void ClearDepthBuffer();
 
-		static void DrawElements(const VertexArray& vertexArray, const Transform& transform, Shader& shader);
+		static void DrawElements(
+            const Camera& camera,
+            const VertexArray& vertexArray, 
+            const Transform& transform, 
+            Shader& shader
+        );
 
 
 		static void EnableDepthTest();

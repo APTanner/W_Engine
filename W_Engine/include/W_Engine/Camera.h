@@ -25,16 +25,17 @@ namespace W_Engine
 		void SetActive();
 
 		Transform& GetTransform() { return m_transform; }
-		inline const glm::mat4& GetView() { UpdateViewMatrix();  return m_viewMatrix; }
+        void UpdateMatricies() { UpdateViewMatrix(); UpdateProjectionMatrix(); }
+		inline const glm::mat4& GetView() const { return m_viewMatrix; }
 		inline const glm::mat4& GetProjection() const { return m_projectionMatrix; }
 	private:
 		void UpdateViewMatrix();
 		void UpdateProjectionMatrix();
 		void SubscribeToOnScreenResize();
 	private:
-		Transform m_transform;
-		glm::mat4 m_viewMatrix;
-		glm::mat4 m_projectionMatrix;
+        Transform m_transform{};
+        glm::mat4 m_viewMatrix{};
+        glm::mat4 m_projectionMatrix{};
 
 		float m_fieldOfView;
 	private:

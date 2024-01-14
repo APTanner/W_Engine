@@ -51,8 +51,9 @@ namespace W_Engine
 	VertexBuffer::VertexBuffer(float* verticies, size_t size, BufferLayout layout)
 	{
 		glGenBuffers(1, &m_vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+        Bind();
 		glBufferData(GL_ARRAY_BUFFER, size, verticies, GL_STATIC_DRAW);
+        Unbind();
 		m_layout = layout;
 	}
 	VertexBuffer::~VertexBuffer()
@@ -73,8 +74,9 @@ namespace W_Engine
 	{
 		m_count = size / sizeof(uint32_t);
 		glGenBuffers(1, &m_ebo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+        Bind();
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indicies, GL_STATIC_DRAW);
+        Unbind();
 	}
 	ElementBuffer::~ElementBuffer()
 	{

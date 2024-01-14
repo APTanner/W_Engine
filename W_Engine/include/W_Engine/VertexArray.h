@@ -16,6 +16,7 @@ namespace W_Engine
             m_vertexBuffer(std::move(other.m_vertexBuffer)),
             m_elementBuffer(std::move(other.m_elementBuffer))
         {
+            other.m_vao = 0;
         }
 
 		void SetVertexBuffer(std::unique_ptr<VertexBuffer> vertexBuffer);

@@ -7,10 +7,14 @@ namespace W_Engine
 {
     class ResourceManager
     {
+        friend class Application;
     public:
-        static Model LoadModel(const std::string& filepath);
-        static Shader LoadShader(const std::string& filepath);
-        static Texture LoadTexture(const char* filepath, TextureType textureType);
-        static Texture LoadTexture(const std::string& filepath, TextureType textureType);
+        Model LoadModel(const std::string& filepath);
+        Shader LoadShader(const std::string& filepath);
+        Texture LoadTexture(const char* filepath, TextureType textureType);
+        Texture LoadTexture(const std::string& filepath, TextureType textureType);
+    private:
+        ResourceManager() {}
+        ~ResourceManager() {}
     };
 }

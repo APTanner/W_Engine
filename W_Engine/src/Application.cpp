@@ -6,13 +6,20 @@
 
 #include <W_Engine/Event.h>
 #include <W_Engine/Time.h>
+#include <W_Engine/Buffer.h>
+#include <W_Engine/VertexArray.h>
 
 namespace W_Engine
 {
 	Application* Application::m_instance = nullptr;
 
+    VertexArray* vertexArray;
+    Shader* shader;
+
 	Application::Application()
-		: m_eventDispatcher(), m_eventQueue(m_eventDispatcher)
+		: m_eventDispatcher(), m_eventQueue(m_eventDispatcher), 
+        m_renderer(), m_resourceManager(), 
+        m_running(true)
 	{
 		ASSERT(m_instance == nullptr, "Can't have multiple applications.");
 		m_instance = this;
@@ -27,25 +34,22 @@ namespace W_Engine
 		m_instance = nullptr;
 	}
 
-	void Application::Run()
+	void Application::PreRender(Camera& camera)
 	{
-        m_running = true;
+		Time::Update();
 
-		RenderCommands::SetClearColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
-		RenderCommands::EnableDepthTest();
+		WindowManager::GetInstance().PollEvents();
+		m_eventQueue.DispatchEvents();
 
-        while (m_running)
-        {
-			Time::Update();
+		RenderCommands::ClearColorBuffer();
+		RenderCommands::ClearDepthBuffer();
 
-			WindowManager::GetInstance().PollEvents();
-			m_eventQueue.DispatchEvents();
+        m_renderer.SetCamera(camera);
+    }
 
-			RenderCommands::ClearColorBuffer();
-			RenderCommands::ClearDepthBuffer();
-
-            WindowManager::GetInstance().SwapWindowBuffers();
-        }
+    void Application::PostRender()
+    {
+        WindowManager::GetInstance().SwapWindowBuffers();
     }
 
 	void Application::RegisterEvents()

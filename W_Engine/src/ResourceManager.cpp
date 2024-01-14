@@ -1,5 +1,7 @@
 #include <W_Engine/ResourceManager.h>
 
+#include <W_Engine/Application.h>
+
 #include <Windows.h>
 #include <filesystem>
 #include <fstream>
@@ -55,9 +57,6 @@ static W_Engine::Material loadMaterial(const aiMaterial& mat)
     mat.Get(AI_MATKEY_COLOR_SPECULAR, color);
     material.Specular = glm::vec3(color.r, color.b, color.g);
 
-    mat.Get(AI_MATKEY_SHININESS, shininess);
-    material.Shininess = shininess;
-
     return material;
 }
 
@@ -68,7 +67,8 @@ static std::vector<W_Engine::Texture> loadMaterialTextures(const aiMaterial& mat
     {
         aiString str;
         mat.GetTexture(type, i, &str);
-        W_Engine::Texture texture = W_Engine::ResourceManager::LoadTexture(str.C_Str(), textureType);
+        W_Engine::Texture texture = 
+            W_Engine::Application::Get().GetResourceManager().LoadTexture(str.C_Str(), textureType);
         textures.push_back(texture);
     }
     return textures;
