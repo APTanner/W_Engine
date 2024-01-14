@@ -1,7 +1,6 @@
 #include <W_Engine/VertexArray.h>
 
 #include <memory>
-#include <iostream>
 
 #include <glad/glad.h>
 

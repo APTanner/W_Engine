@@ -18,7 +18,7 @@ namespace W_Engine
 
 	Application::Application()
 		: m_eventDispatcher(), m_eventQueue(m_eventDispatcher), 
-        m_renderer(), m_resourceManager(), 
+        m_renderer(), m_resourceManager(), m_input(),
         m_running(true)
 	{
 		ASSERT(m_instance == nullptr, "Can't have multiple applications.");
@@ -34,13 +34,16 @@ namespace W_Engine
 		m_instance = nullptr;
 	}
 
+    void Application::InitializeAndPoll()
+    {
+        Time::Update();
+
+        WindowManager::GetInstance().PollEvents();
+        m_eventQueue.DispatchEvents();
+    }
+
 	void Application::PreRender(Camera& camera)
 	{
-		Time::Update();
-
-		WindowManager::GetInstance().PollEvents();
-		m_eventQueue.DispatchEvents();
-
 		RenderCommands::ClearColorBuffer();
 		RenderCommands::ClearDepthBuffer();
 

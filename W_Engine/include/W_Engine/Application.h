@@ -1,6 +1,7 @@
 #pragma once
 
 #include <W_Engine/Window.h>
+#include <W_Engine/Input.h>
 #include <W_Engine/Event.h>
 #include <W_Engine/Renderer.h>
 #include <W_Engine/ResourceManager.h>
@@ -17,12 +18,15 @@ namespace W_Engine
         inline static bool IsRunning() { return Get().m_running; }
 		inline static Application& Get() { return *m_instance; }
 
+        const Window* GetWindow() { return m_window; }
+
         Renderer& GetRenderer() { return m_renderer; }
         ResourceManager& GetResourceManager() { return m_resourceManager; }
-
 		EventQueue& GetEventQueue() { return m_eventQueue; }
 		EventDispatcher& GetEventDispatcher() { return m_eventDispatcher; }
+        Input& GetInput() { return m_input; }
 
+        void InitializeAndPoll();
 		void PreRender(Camera& camera);
         void PostRender();
 	private:
@@ -34,6 +38,7 @@ namespace W_Engine
 		EventQueue m_eventQueue;
         Renderer m_renderer;
         ResourceManager m_resourceManager;
+        Input m_input;
 	private:
 		void RegisterEvents();
 	};
