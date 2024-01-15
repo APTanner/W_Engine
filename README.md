@@ -2,6 +2,13 @@
 
 **Windows only Rendering Engine**
 
+## Building
+Uses cmake as a build system
+
+- Run `GenerateProject.BAT` in the main directory
+- A `build` folder will be created with a Microsoft Visual Studio solution
+- Use Microsoft Visual Studio to compile and run the project
+
 ## Includes
 
 - [**GLAD**](https://glad.dav1d.de/) - OpenGL Loader-Generator, manages OpenGL function pointers.
