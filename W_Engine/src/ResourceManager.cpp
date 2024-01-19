@@ -21,6 +21,19 @@
 
 #include <glad/glad.h>
 
+constexpr char SEPARATOR = '\\';
+
+static const std::string getDirectoryFromPath(const std::string& path)
+{
+    std::string directory{};
+    size_t lastBackslash = path.find_last_of(SEPARATOR);
+    if (lastBackslash != std::string::npos)
+    {
+        directory = path.substr(0, lastBackslash);
+    }
+    return directory;
+}
+
 static const std::string& getResourcesPath()
 {
     static std::string path;
@@ -30,13 +43,7 @@ static const std::string& getResourcesPath()
         char buffer[MAX_PATH];
         GetModuleFileNameA(NULL, buffer, MAX_PATH);
         path = buffer;
-
-        size_t lastBackSlash = path.find_last_of("\\");
-        if (lastBackSlash != std::string::npos)
-        {
-            path = path.substr(0, lastBackSlash);
-        }
-        path = path + "\\resources";
+        path = getDirectoryFromPath(path) + SEPARATOR + "resources";
     }
 
     return path;
@@ -49,39 +56,46 @@ static W_Engine::Material loadMaterial(const aiMaterial& mat)
     float shininess;
 
     mat.Get(AI_MATKEY_COLOR_DIFFUSE, color);
-    material.Diffuse = glm::vec3(color.r, color.b, color.g);
+    material.Diffuse = glm::vec3(color.r, color.g, color.b);
 
     mat.Get(AI_MATKEY_COLOR_AMBIENT, color);
-    material.Ambient = glm::vec3(color.r, color.b, color.g);
+    material.Ambient = glm::vec3(color.r, color.g, color.b);
 
     mat.Get(AI_MATKEY_COLOR_SPECULAR, color);
-    material.Specular = glm::vec3(color.r, color.b, color.g);
+    material.Specular = glm::vec3(color.r, color.g, color.b);
 
     return material;
 }
 
-static std::vector<W_Engine::Texture> loadMaterialTextures(const aiMaterial& mat, aiTextureType type, W_Engine::TextureType textureType)
+static std::vector<std::unique_ptr<W_Engine::Texture>> loadMaterialTextures(
+    const aiMaterial& mat,
+    aiTextureType type,
+    W_Engine::TextureType textureType,
+    const std::string& modelPath
+)
 {
-    std::vector<W_Engine::Texture> textures;
+    std::vector<std::unique_ptr<W_Engine::Texture>> textures;
     for (unsigned int i = 0; i < mat.GetTextureCount(type); i++)
     {
         aiString str;
         mat.GetTexture(type, i, &str);
-        W_Engine::Texture texture = 
-            W_Engine::Application::Get().GetResourceManager().LoadTexture(str.C_Str(), textureType);
-        textures.push_back(texture);
+        std::unique_ptr<W_Engine::Texture> texture = 
+            W_Engine::Application::Get().GetResourceManager().LoadTexture(
+                modelPath + SEPARATOR + str.C_Str(),
+                textureType
+            );
+        textures.push_back(std::move(texture));
     }
     return textures;
 }
 
-static W_Engine::Mesh processMesh(aiMesh* mesh, const aiScene* scene)
+static W_Engine::Mesh processMesh(aiMesh* mesh, const aiScene* scene, const std::string& modelPath)
 {
     const int numVerts = mesh->mNumVertices;
     const int numIndicies = mesh->mNumFaces * 3;
 
     std::vector<W_Engine::Vertex> verticies(numVerts);
     std::vector<uint32_t> indicies(numIndicies);
-    W_Engine::Texture texture;
 
     bool isTextureCoords = mesh->mTextureCoords[0];
     bool isVertexColors = mesh->mColors[0];
@@ -140,26 +154,36 @@ static W_Engine::Mesh processMesh(aiMesh* mesh, const aiScene* scene)
         }
     }
 
-    std::vector<W_Engine::Texture> textures{};
+    std::vector<std::unique_ptr<W_Engine::Texture>> textures{};
     W_Engine::Material meshMaterial{};
     if (mesh->mMaterialIndex >= 0)
     {
         aiMaterial& material = *scene->mMaterials[mesh->mMaterialIndex];
 
-        auto diffuseTextures = loadMaterialTextures(material,
-            aiTextureType_DIFFUSE, W_Engine::TextureType::Diffuse);
+        auto diffuseTextures = loadMaterialTextures(
+            material,
+            aiTextureType_DIFFUSE, 
+            W_Engine::TextureType::Diffuse,
+            modelPath
+        ); 
+        
         textures.reserve(textures.size() + diffuseTextures.size());
-        std::move(diffuseTextures.begin(), diffuseTextures.end(), std::back_inserter(textures));
+        std::move(std::make_move_iterator(diffuseTextures.begin()), std::make_move_iterator(diffuseTextures.end()), std::back_inserter(textures));
 
-        auto specularTextures = loadMaterialTextures(material,
-            aiTextureType_SPECULAR, W_Engine::TextureType::Specular);
+        auto specularTextures = loadMaterialTextures(
+            material,
+            aiTextureType_SPECULAR,
+            W_Engine::TextureType::Specular,
+            modelPath
+        );
+
         textures.reserve(textures.size() + specularTextures.size());
-        std::move(specularTextures.begin(), specularTextures.end(), std::back_inserter(textures));
+        std::move(std::make_move_iterator(specularTextures.begin()), std::make_move_iterator(specularTextures.end()), std::back_inserter(textures));
 
         meshMaterial = loadMaterial(material);
     }
 
-    return W_Engine::Mesh(verticies, indicies, textures, meshMaterial);
+    return W_Engine::Mesh(verticies, indicies, std::move(textures), meshMaterial);
 }
 
 static void processNode(aiNode* node, const aiScene* scene, W_Engine::Model& model)
@@ -170,8 +194,8 @@ static void processNode(aiNode* node, const aiScene* scene, W_Engine::Model& mod
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         model.Meshes.push_back(
             std::make_unique<W_Engine::Mesh>(
-                processMesh(mesh, scene)
-                )
+                processMesh(mesh, scene, model.Path)
+            )
         );
     }
 
@@ -184,7 +208,7 @@ static void processNode(aiNode* node, const aiScene* scene, W_Engine::Model& mod
 
 namespace W_Engine
 {
-    constexpr char SEPARATOR = '\\';
+    
 
     Model ResourceManager::LoadModel(const std::string& filepath)
     {
@@ -192,7 +216,8 @@ namespace W_Engine
 
         if (!std::filesystem::exists(path))
         {
-            throw std::runtime_error("File not found");
+            LOG_ERROR("Model not found at path: %s", path);
+            return Model();
         }
 
         Assimp::Importer importer;
@@ -207,7 +232,7 @@ namespace W_Engine
         }
 
         Model model{};
-        model.Path = path;
+        model.Path = getDirectoryFromPath(path);
         processNode(scene->mRootNode, scene, model);
 
         return model;
@@ -261,36 +286,36 @@ namespace W_Engine
         return Shader(vShader.str(), fShader.str());
     }
 
-    //From LearnOpenGL
-    Texture ResourceManager::LoadTexture(const std::string& filepath, TextureType textureType = TextureType::None)
+    std::unique_ptr<Texture> ResourceManager::LoadTexture(const std::string& filepath, TextureType textureType = TextureType::None)
     {
+        if (!std::filesystem::exists(filepath))
+        {
+            LOG_ERROR("Texture not found at path: %s", filepath);
+        }
         return ResourceManager::LoadTexture(filepath.c_str(), textureType);
     }
 
-    Texture ResourceManager::LoadTexture(const char* filepath, TextureType textureType = TextureType::None)
+    std::unique_ptr<Texture> ResourceManager::LoadTexture(const char* filepath, TextureType textureType = TextureType::None)
     {
-        Texture texture{};
-        texture.Type = textureType;
-        glGenTextures(1, &texture.ID);
-        glBindTexture(GL_TEXTURE_2D, texture.ID);
-        // set the texture wrapping/filtering options (on the currently bound texture object)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // load and generate the texture
         int width, height, nrChannels;
         unsigned char* data = stbi_load(filepath, &width, &height, &nrChannels, 0);
+        
+        LOG_DEBUG("Width: %d, Height: %d, Channels: %d", width, height, nrChannels);
+
+        std::unique_ptr<Texture> texture;
         if (data)
         {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-            glGenerateMipmap(GL_TEXTURE_2D);
+            texture = std::make_unique<Texture>(textureType, data, width, height);
         }
         else
         {
             LOG_ERROR("Failure to load texture at path %s", filepath);
+            texture = std::make_unique<Texture>(Texture::GeneratePlaceholderTexture());
         }
+
         stbi_image_free(data);
+
+
         return texture;
     }
 }

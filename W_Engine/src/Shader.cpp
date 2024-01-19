@@ -135,19 +135,36 @@ namespace W_Engine
 	{
 		SetMat4("localToWorld", localToClip);
 	}
+
 	void Shader::SetViewMatrix(const glm::mat4& view)
 	{
 		SetMat4("view", view);
 	}
+
 	void Shader::SetProjectionMatrix(const glm::mat4& projection)
 	{
 		SetMat4("projection", projection);
 	}
+
+    void Shader::SetMaterial(const Material& material)
+    {
+        SetVec3("m_diffuse", material.Diffuse);
+        SetVec3("m_specular", material.Specular);
+        SetVec3("m_ambient", material.Ambient);
+    }
+
 	void Shader::SetMat4(const std::string& name, const glm::mat4& matrix)
 	{
 		GLint loc = glGetUniformLocation(m_shader, name.c_str());
 		glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
 	}
+
+    void Shader::SetVec3(const std::string& name, const glm::vec3& vector)
+    {
+        GLint loc = glGetUniformLocation(m_shader, name.c_str());
+        glUniform3f(loc, vector.x, vector.y, vector.z);
+    }
+
     void Shader::SetInt(const std::string& name, const int value)
     {
         GLint loc = glGetUniformLocation(m_shader, name.c_str());

@@ -1,8 +1,8 @@
 #pragma once 
 
 #include "VertexArray.h"
-#include "Shader.h"
 #include "Transform.h"
+#include "Texture.h"
 
 #include <vector>
 #include <unordered_map>
@@ -14,26 +14,14 @@
 
 namespace W_Engine
 {
+    class Shader;
+
     struct Vertex
     {
         glm::vec3 Position{};
         glm::vec3 Normal{};
         glm::vec2 UVCoord{};
         glm::vec3 Color{};
-    };
-
-    enum class TextureType : int
-    {
-        None,
-        Specular,
-        Diffuse,
-        Normal
-    };
-
-    const std::unordered_map<TextureType, std::string> TEXTURE_SAMPLER_NAMES{
-        {TextureType::Specular, "t_specular"},
-        {TextureType::Diffuse, "t_diffuse"},
-        {TextureType::Normal, "t_normal"}
     };
 
     struct Material
@@ -43,16 +31,10 @@ namespace W_Engine
         glm::vec3 Ambient;
     };
 
-    struct Texture
-    {
-        uint32_t ID = 0;
-        TextureType Type = static_cast<TextureType>(-1);
-    };
-
     class Mesh
     {
     public:
-        Mesh(const std::vector<Vertex>& verticies, const std::vector<uint32_t> indicies, const std::vector<Texture> textures, const Material& material);
+        Mesh(const std::vector<Vertex>& verticies, const std::vector<uint32_t> indicies, std::vector<std::unique_ptr<Texture>>&& textures, const Material& material);
         Mesh(Mesh&& other) noexcept :
             m_verticies(std::move(other.m_verticies)),
             m_indicies(std::move(other.m_indicies)),
@@ -73,7 +55,7 @@ namespace W_Engine
     //private:
         std::vector<Vertex> m_verticies;
         std::vector<uint32_t> m_indicies;
-        std::vector<Texture> m_textures;
+        std::vector<std::unique_ptr<Texture>> m_textures;
         Material m_material;
 
         VertexArray m_vertexArray = VertexArray{};

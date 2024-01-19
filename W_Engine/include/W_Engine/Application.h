@@ -36,8 +36,10 @@ namespace W_Engine
 
 		EventDispatcher m_eventDispatcher;
 		EventQueue m_eventQueue;
+
         Renderer m_renderer;
         ResourceManager m_resourceManager;
+
         Input m_input;
 	private:
 		void RegisterEvents();

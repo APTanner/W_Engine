@@ -18,30 +18,32 @@ void moveCamera(W_Engine::Transform& cameraTransform)
     using namespace W_Engine;
 
     Application& app = Application::Get();
+    glm::vec3 movement{};
     if (app.GetInput().GetKeyDown(KEY_W))
     {
-        cameraTransform.TranslateLocalSpace(
-            glm::vec3(0, 0, -1) * CAMERA_MOVE_SPEED * Time::DeltaTime()
-        );
+        movement += glm::vec3(0, 0, -1);
     }
     if (app.GetInput().GetKeyDown(KEY_S))
     {
-        cameraTransform.TranslateLocalSpace(
-            glm::vec3(0, 0, 1) * CAMERA_MOVE_SPEED * Time::DeltaTime()
-        );
+        movement += glm::vec3(0, 0, 1);
     }
     if (app.GetInput().GetKeyDown(KEY_A))
     {
-        cameraTransform.TranslateLocalSpace(
-            glm::vec3(-1, 0, 0) * CAMERA_MOVE_SPEED * Time::DeltaTime()
-        );
+        movement += glm::vec3(-1, 0, 0);
     }
     if (app.GetInput().GetKeyDown(KEY_D))
     {
-        cameraTransform.TranslateLocalSpace(
-            glm::vec3(1, 0, 0) * CAMERA_MOVE_SPEED * Time::DeltaTime()
-        );
+        movement += glm::vec3(1, 0, 0);
     }
+    if (app.GetInput().GetKeyDown(KEY_SPACE))
+    {
+        movement += glm::vec3(0, 1, 0);
+    }
+    if (app.GetInput().GetKeyDown(KEY_LEFT_CONTROL))
+    {
+        movement += glm::vec3(0, -1, 0);
+    }
+    cameraTransform.TranslateLocalSpace(movement * CAMERA_MOVE_SPEED * Time::DeltaTime());
 
     static glm::vec2 lastMousePosition = glm::vec2{};
     static glm::vec2 yawAndPitch = glm::vec2{};
@@ -65,11 +67,11 @@ void moveCamera(W_Engine::Transform& cameraTransform)
         heading = glm::normalize(heading);
 
         // Calculate pitch (angle with the XZ plane)
-        float pitchRadians = std::asin(heading.y);
-        float pitchDegrees = glm::degrees(pitchRadians);
+        //float pitchRadians = std::asin(heading.y);
+        //float pitchDegrees = glm::degrees(pitchRadians);
 
-        float yaw = std::atan2(heading.z, heading.x);
-        float yawDegrees = glm::degrees(yaw);
+        //float yaw = std::atan2(heading.z, heading.x);
+        //float yawDegrees = glm::degrees(yaw);
 
     }
     lastMousePosition = currentMousePos;
@@ -77,23 +79,25 @@ void moveCamera(W_Engine::Transform& cameraTransform)
 
 int main()
 {
-    W_Engine::Application app{};
-    W_Engine::Renderer& renderer = app.GetRenderer();
-    W_Engine::ResourceManager& resourceManager = app.GetResourceManager();
+    using namespace W_Engine;
 
-    W_Engine::Shader shader = resourceManager.LoadShader("default.shader");
-    W_Engine::Model model = resourceManager.LoadModel("cube.obj");
+    Application app{};
+    Renderer& renderer = app.GetRenderer();
+    ResourceManager& resourceManager = app.GetResourceManager();
+
+    Shader shader = resourceManager.LoadShader("default.shader");
+    Model cube = resourceManager.LoadModel("Minecraft_Grass_Block_OBJ\\Grass_Block.obj");
     
     renderer.SetBackgroundColor(glm::vec4(0.2f, 0.3f, 0.3f, 1.0f));
     renderer.EnableDepthTest(true);
 
-    W_Engine::Camera camera(45.0f);
+    Camera camera(45.0f);
     camera.GetTransform().SetPosition(glm::vec3(0.0f,0.0f,20.0f));
 
-    W_Engine::Transform transform{};
-    transform.SetPosition(glm::vec3(0,0,10));
+    Transform cubeTransform{};
+    cubeTransform.SetPosition(glm::vec3(0,0,10));
 
-    while (W_Engine::Application::IsRunning())
+    while (Application::IsRunning())
     {
         app.InitializeAndPoll();
 
@@ -101,7 +105,7 @@ int main()
 
         app.PreRender(camera);
 
-        model.Draw(transform, shader);
+        cube.Draw(cubeTransform, shader);
 
         app.PostRender();
     }

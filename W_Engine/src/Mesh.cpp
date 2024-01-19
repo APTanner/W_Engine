@@ -16,7 +16,12 @@ static bool isUniqueTextureType(W_Engine::TextureType textureType, uint32_t& bit
 
 namespace W_Engine
 {
-	Mesh::Mesh(const std::vector<Vertex>& verticies, const std::vector<uint32_t> indicies, const std::vector<Texture> textures, const Material& material)
+	Mesh::Mesh(
+        const std::vector<Vertex>& verticies,
+        const std::vector<uint32_t> indicies,
+        std::vector<std::unique_ptr<Texture>>&& textures,
+        const Material& material
+    )
 	{
 		m_verticies = verticies;
 		m_indicies = indicies;
@@ -24,23 +29,23 @@ namespace W_Engine
 
         bool isMultipleOfSameType = false;
         uint32_t bitField = 0;
-        for (const Texture& texture : textures)
+        for (std::unique_ptr<Texture>& texture : textures)
         {
-            switch(texture.Type)
+            switch(texture->GetTextureType())
             {
             case TextureType::None:
                 LOG_ERROR("Texture should not have a 'None' type");
                 break;
             case TextureType::Specular:
-                if (isUniqueTextureType(TextureType::Specular, bitField)) { m_textures.push_back(texture); }
+                if (isUniqueTextureType(TextureType::Specular, bitField)) { m_textures.push_back(std::move(texture)); }
                 else { isMultipleOfSameType = true; }
                 break;
             case TextureType::Diffuse:
-                if (isUniqueTextureType(TextureType::Diffuse, bitField)) { m_textures.push_back(texture); }
+                if (isUniqueTextureType(TextureType::Diffuse, bitField)) { m_textures.push_back(std::move(texture)); }
                 else { isMultipleOfSameType = true; }
                 break;
             case TextureType::Normal:
-                if (isUniqueTextureType(TextureType::Normal, bitField)) { m_textures.push_back(texture); }
+                if (isUniqueTextureType(TextureType::Normal, bitField)) { m_textures.push_back(std::move(texture)); }
                 else { isMultipleOfSameType = true; }
                 break;
             }
@@ -102,13 +107,32 @@ namespace W_Engine
 
 	void Mesh::Draw(const Transform& transform, Shader& shader) const
 	{
+        //set material
+        shader.SetMaterial(m_material);
+
+        //set textures
+
+        //initialize all textures to be a 1x1 white pixel
+        int j = 0;
+        for (const auto& pair : TEXTURE_SAMPLER_NAMES)
+        {
+            glActiveTexture(GL_TEXTURE0 + j);
+            auto a = pair.second;
+            shader.SetInt(pair.second, j);
+            glBindTexture(GL_TEXTURE_2D, Texture::GetPlaceHolderTexture().GetID());
+            ++j;
+        }
+
+        //if the mesh has textures then replace the white pixels
         for (int i = 0; i < m_textures.size(); ++i)
         {
             glActiveTexture(GL_TEXTURE0 + i);
-            shader.SetInt(TEXTURE_SAMPLER_NAMES.at(m_textures[i].Type), i);
-            glBindTexture(GL_TEXTURE_2D, m_textures[i].ID);
+            auto a = TEXTURE_SAMPLER_NAMES.at(m_textures[i]->GetTextureType());
+            shader.SetInt(TEXTURE_SAMPLER_NAMES.at(m_textures[i]->GetTextureType()), i);
+            glBindTexture(GL_TEXTURE_2D, m_textures[i]->GetID());
+            
         }
-        glActiveTexture(GL_TEXTURE0);
+
 		Application::Get().GetRenderer().Render(m_vertexArray, transform, shader);
 	}
 
