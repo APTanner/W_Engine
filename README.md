@@ -37,9 +37,14 @@ Paths should be specified relative to the `resources` folder and should use doub
 - `A` : Move left.
 - `D` : Move right.
 
+- `SPACE` : Move up.
+- `LEFT CNTRL` : Move down.
+
 Click and drag to rotate the camera.
 
 ## Future Work
 
-- Textures are not currently loaded correctly.
-- Materials are not displayed correctly.
+- Lighting Calculations
+- More flexible importation
+- Culling
+- Batched Rendering
